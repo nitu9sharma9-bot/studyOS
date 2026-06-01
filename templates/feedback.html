@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback — StudyOS</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+</style>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #08090d; --bg2: #0f1117; --bg3: #161820;
+    --surface: rgba(255,255,255,0.04); --surface2: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #eeeef0; --muted: rgba(238,238,240,0.45); --muted2: rgba(238,238,240,0.25);
+    --accent: #7c6ff7; --green: #22c55e; --green-dim: rgba(34,197,94,0.15);
+    --red: #f87171; --red-dim: rgba(248,113,113,0.12);
+    --sidebar-w: 240px; --radius: 16px; --radius-sm: 10px;
+  }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 10%, rgba(124,111,247,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, rgba(34,197,94,0.07) 0%, transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+    background: var(--bg2); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; padding: 28px 0; z-index: 100;
+    transition: transform 0.3s ease;
+  }
+  .logo { padding: 0 24px 28px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .logo-mark { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo-mark span { color: var(--accent); }
+  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: 1px; text-transform: uppercase; }
+  .nav-section { padding: 0 12px; margin-bottom: 8px; }
+  .nav-label { font-size: 10px; color: var(--muted2); letter-spacing: 1.2px; text-transform: uppercase; padding: 0 12px; margin-bottom: 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+    border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; color: var(--muted);
+    cursor: pointer; transition: all 0.15s; text-decoration: none; position: relative;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active { background: rgba(124,111,247,0.12); color: var(--accent); }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 3px; background: var(--accent); border-radius: 0 3px 3px 0;
+  }
+  .nav-icon { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+  .sidebar-footer { margin-top: auto; padding: 20px 12px 0; border-top: 1px solid var(--border); }
+  .user-card {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+    background: var(--surface); border-radius: var(--radius-sm); cursor: pointer;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-role { font-size: 11px; color: var(--muted); }
+  .user-dots { color: var(--muted); font-size: 16px; margin-left: auto; }
+
+  /* HAMBURGER */
+  .hamburger {
+    display: none; position: fixed; top: 16px; left: 16px;
+    width: 40px; height: 40px; background: var(--bg2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    cursor: pointer; z-index: 200;
+    align-items: center; justify-content: center; flex-direction: column; gap: 5px;
+  }
+  .hamburger span { display: block; width: 18px; height: 2px; background: var(--text); border-radius: 2px; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar-w); min-height: 100vh; position: relative; z-index: 1; }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 32px; border-bottom: 1px solid var(--border);
+    background: rgba(8,9,13,0.7); backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-left h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+  .topbar-left p { font-size: 13px; color: var(--muted); margin-top: 1px; }
+  .back-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); padding: 8px 16px; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s;
+  }
+  .back-btn:hover { background: var(--surface2); color: var(--text); }
+  .content { padding: 28px 32px; max-width: 680px; }
+
+  /* FLASH */
+  .flash-success {
+    background: var(--green-dim); border: 1px solid rgba(34,197,94,0.3);
+    border-radius: var(--radius-sm); padding: 12px 16px;
+    color: var(--green); font-size: 13px; font-weight: 600;
+    margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* FORM */
+  .form-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .form-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .form-icon {
+    width: 40px; height: 40px; border-radius: var(--radius-sm);
+    background: rgba(124,111,247,0.15);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .form-title { font-size: 15px; font-weight: 700; }
+  .form-sub { font-size: 12px; color: var(--muted); }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+  .form-input, .form-select, .form-textarea {
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: inherit; font-size: 14px; outline: none; width: 100%;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--accent); background: rgba(124,111,247,0.05);
+  }
+  .form-select { appearance: none; cursor: pointer; }
+  .form-select option { background: #0f1117; color: var(--text); }
+  .form-textarea { resize: vertical; line-height: 1.6; }
+  .info-box {
+    background: rgba(124,111,247,0.06); border: 1px solid rgba(124,111,247,0.2);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+    font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 16px;
+  }
+  .submit-btn {
+    width: 100%; padding: 11px;
+    background: linear-gradient(135deg, #6c63ff, #8b5cf6);
+    border: none; border-radius: var(--radius-sm); color: white;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s, transform 0.15s; margin-top: 4px;
+  }
+  .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .overlay.open { display: block; }
+    .hamburger { display: flex; }
+    .main { margin-left: 0; }
+    .topbar { padding: 16px 20px; padding-left: 68px; }
+    .content { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-mark">Study<span>OS</span></div>
+    <div class="logo-sub">JEE 2025 Dashboard</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <a class="nav-item" href="/"><span class="nav-icon">⊞</span> Dashboard</a>
+    <a class="nav-item" href="/planner"><span class="nav-icon">📚</span> Planner</a>
+    <a class="nav-item" href="/schedule"><span class="nav-icon">📔</span> Schedule</a>
+    <a class="nav-item" href="/progress"><span class="nav-icon">📈</span> Progress</a>
+  </div>
+  <div class="nav-section" style="margin-top:10px;">
+    <div class="nav-label">Resources</div>
+    <a class="nav-item" href="/ncert_pdf"><span class="nav-icon">📘</span> NCERT</a>
+    <a class="nav-item" href="/documentary"><span class="nav-icon">🎬</span> Documentary</a>
+    <a class="nav-item" href="/leaderboard"><span class="nav-icon">🏆</span> Leaderboard</a>
+    <a class="nav-item" href="/flashcards"><span class="nav-icon">🃏</span> Flashcard</a>
+    <a class="nav-item" href="/nodes"><span class="nav-icon">🧠</span> Nodes</a>
+    <a class="nav-item" href="/doubt"><span class="nav-icon">🤖</span> AI Doubt</a>
+    <a class="nav-item active" href="/feedback"><span class="nav-icon">🐛</span> Feedback</a>
+  </div>
+  <div class="sidebar-footer">
+    <a href="/profile" style="text-decoration:none;">
+      <div class="user-card">
+        <div class="avatar">
+          {% if current_user.avatar %}
+            <img src="{{ current_user.avatar }}" alt="avatar">
+          {% else %}
+            {{ current_user.username[0].upper() }}
+          {% endif %}
+        </div>
+        <div>
+          <div class="user-name">{{ current_user.username }}</div>
+          <div class="user-role">{{ current_user.exam }} Aspirant</div>
+        </div>
+        <div class="user-dots">⋯</div>
+      </div>
+    </a>
+  </div>
+</aside>
+
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+  <span></span><span></span><span></span>
+</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>🐛 Report a Bug</h1>
+      <p>Help us improve StudyOS</p>
+    </div>
+    <a class="back-btn" href="/">← Back Home</a>
+  </div>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash-success">✅ {{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="form-card">
+      <div class="form-header">
+        <div class="form-icon">🐛</div>
+        <div>
+          <div class="form-title">Bug / Feedback Report</div>
+          <div class="form-sub">Tell us what's broken or what you'd like improved</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        💡 Be as specific as possible — mention what you did and what went wrong.
+      </div>
+
+      <form method="POST" action="/feedback">
+        <div class="form-group">
+          <label class="form-label">Which page has the problem?</label>
+          <select name="page" class="form-select" required>
+            <option value="">— Select a page —</option>
+            <option value="Dashboard">Dashboard</option>
+            <option value="Planner">Planner</option>
+            <option value="Schedule">Schedule</option>
+            <option value="Notes">Notes</option>
+            <option value="Progress">Progress</option>
+            <option value="Nodes">Nodes</option>
+            <option value="Flashcards">Flashcards</option>
+            <option value="AI Doubt">AI Doubt</option>
+            <option value="Leaderboard">Leaderboard</option>
+            <option value="Documentary">Documentary</option>
+            <option value="NCERT PDF">NCERT PDF</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select name="type" class="form-select">
+            <option value="bug">🐛 Bug — something is broken</option>
+            <option value="suggestion">💡 Suggestion / Feature idea</option>
+            <option value="ui">🎨 UI / Design issue</option>
+            <option value="other">❓ Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Describe the issue</label>
+          <textarea name="message" class="form-textarea" rows="5"
+            placeholder="e.g. When I click 'Add Plan', nothing happens and the page goes blank..." required></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">🚀 Submit Feedback</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>

@@ -189,7 +189,16 @@ def init_db():
         to_id INTEGER
     )
     """)
-
+    cur.execute("""
+     CREATE TABLE IF NOT EXISTS feedback(
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         user_id INTEGER,
+         username TEXT,
+          page TEXT,
+          message TEXT,
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
     # ✅ doubts table here not inside route
     cur.execute("""
     CREATE TABLE IF NOT EXISTS doubts(
@@ -763,6 +772,50 @@ def delete_progress(id):
     conn.close()
     return jsonify({"status": "deleted"})
 
+# ── FEEDBACK ──
+@app.route("/feedback", methods=["GET", "POST"])
+@login_required
+def feedback():
+    if request.method == "POST":
+        page = request.form.get("page", "").strip()
+        message = request.form.get("message", "").strip()
+        conn = get_db()
+        conn.execute(
+            "INSERT INTO feedback(user_id, username, page, message) VALUES(?,?,?,?)",
+            (current_user.id, current_user.username, page, message)
+        )
+        conn.commit()
+        conn.close()
+        flash("✅ Feedback sent! Thank you.", "success")
+        return redirect("/feedback")
+    return render_template("feedback.html")
+
+
+# ── ADMIN: VIEW FEEDBACK ──
+@app.route("/admin/feedback")
+@login_required
+def admin_feedback():
+    if current_user.username != "YOUR_USERNAME":  # 👈 put your username here
+        return "Access denied", 403
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM feedback ORDER BY created_at DESC"
+    ).fetchall()
+    conn.close()
+    return render_template("admin_feedback.html", feedbacks=rows)
+
+
+# ── DELETE FEEDBACK (admin only) ──
+@app.route("/delete_feedback/<int:id>", methods=["POST"])
+@login_required
+def delete_feedback(id):
+    if current_user.username != "YOUR_USERNAME":  # 👈 same username
+        return "Access denied", 403
+    conn = get_db()
+    conn.execute("DELETE FROM feedback WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "deleted"})
 
 # ── QUIZ ──
 @app.route("/quiz", methods=["GET", "POST"])
