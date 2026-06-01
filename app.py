@@ -795,7 +795,7 @@ def feedback():
 @app.route("/admin/feedback")
 @login_required
 def admin_feedback():
-    if current_user.username != "YOUR_USERNAME":  # 👈 put your username here
+    if current_user.username != "anuragrajraj14@gmail.com":  # 👈 put your username here
         return "Access denied", 403
     conn = get_db()
     rows = conn.execute(
@@ -809,7 +809,7 @@ def admin_feedback():
 @app.route("/delete_feedback/<int:id>", methods=["POST"])
 @login_required
 def delete_feedback(id):
-    if current_user.username != "YOUR_USERNAME":  # 👈 same username
+    if current_user.username != "anuragrajraj14@gmail.com":  # 👈 same username
         return "Access denied", 403
     conn = get_db()
     conn.execute("DELETE FROM feedback WHERE id=?", (id,))
