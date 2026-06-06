@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StudyOS — Anurag</title>
+<title>StudyOS</title>
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
@@ -247,21 +247,26 @@
     <a class="nav-item" href="/ncert_pdf"><span class="nav-icon">📘</span> NCERT</a>
     <a class="nav-item" href="/documentary"><span class="nav-icon">🎬</span> Documentary</a>
     <a class="nav-item" href="/leaderboard"><span class="nav-icon">🏆</span> Leaderboard</a>
-    <a class="nav-item" href="/quiz"><span class="nav-icon">🧠</span> Quiz</a>
     <a class="nav-item" href="/flashcards"><span class="nav-icon">🃏</span> Flashcards</a>
     <a class="nav-item" href="/nodes"><span class="nav-icon">🧠</span> Nodes</a>
      <a class="nav-item" href="/doubt"><span class="nav-icon">🤖</span> AI Doubt</a>
-      <a class="nav-item active" href="/feedback"><span class="nav-icon">🐛</span> Feedback</a>
+     <a class="nav-item " href="/feedback"><span class="nav-icon">🐛</span> Feedback</a>
   </div>
   <div class="sidebar-footer">
-    <div class="user-card">
-      <div class="avatar">A</div>
+    <a class="user-card" href="/profile">
+      <div class="avatar">
+        {% if current_user.avatar %}
+        <img src="{{ current_user.avatar }}">
+        {% else %}
+        {{ current_user.username[0].upper() }}
+        {% endif %}
+      </div>
       <div>
-        <div class="user-name">Anurag</div>
-        <div class="user-role">JEE Aspirant</div>
+        <div class="user-name">{{ current_user.username }}</div>
+        <div class="user-role">{{ current_user.exam }} Aspirant</div>
       </div>
       <div class="user-dots">⋯</div>
-    </div>
+    </a>
   </div>
 </aside>
 
@@ -334,8 +339,7 @@
       </a>
     </div>
 
-    <a class="nav-item" href="/flashcards"><span class="nav-icon">🃏</span> Flashcards</a>
-    <a class="nav-item" href="/nodes"><span class="nav-icon">🧠</span> Node Canvas</a>
+
     <!-- TWO COL -->
     <div class="two-col">
       <div>
@@ -386,11 +390,26 @@
             <div class="tool-name">Documentary</div>
             <div class="tool-desc">Topper stories</div>
           </a>
-          <a class="tool-card" href="/notes">
+
+          <a class="tool-card" href="/doubt">
             <span class="tool-arrow">↗</span>
-            <div class="tool-emoji">📝</div>
-            <div class="tool-name">Notes</div>
-            <div class="tool-desc">Quick revision notes</div>
+            <div class="tool-emoji">🤖</div>
+            <div class="tool-name">Doubt</div>
+            <div class="tool-desc">Doubt solver AI</div>
+          </a>
+
+           <a class="tool-card" href="/feedback">
+            <span class="tool-arrow">↗</span>
+            <div class="tool-emoji">🐛</div>
+            <div class="tool-name">Feedback</div>
+            <div class="tool-desc">Report us </div>
+          </a>
+
+           <a class="tool-card" href="/planner">
+            <span class="tool-arrow">↗</span>
+            <div class="tool-emoji">📚</div>
+            <div class="tool-name">Planner</div>
+            <div class="tool-desc">Plan your study </div>
           </a>
         </div>
       </div>
@@ -444,21 +463,7 @@
           <div class="ncert-name">PDFs</div>
           <div class="ncert-desc">All chapters, all subjects</div>
         </a>
-        <a class="ncert-card" href="/notes">
-          <div class="ncert-emoji">📝</div>
-          <div class="ncert-name">Notes</div>
-          <div class="ncert-desc">Quick revision notes</div>
-        </a>
-        <a class="ncert-card" href="/quiz">
-          <div class="ncert-emoji">🧠</div>
-          <div class="ncert-name">MCQ Quiz</div>
-          <div class="ncert-desc">Practice & test yourself</div>
-        </a>
-        <a class="ncert-card" href="/documentary">
-          <div class="ncert-emoji">🎬</div>
-          <div class="ncert-name">Documentary</div>
-          <div class="ncert-desc">Topper stories</div>
-        </a>
+        
       </div>
     </div>
 

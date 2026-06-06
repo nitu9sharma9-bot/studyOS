@@ -35,6 +35,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 print("KEY FOUND:", bool(GEMINI_API_KEY))
 client = genai.Client(api_key=GEMINI_API_KEY)
 
+
 # ── DATABASE ──
 def get_db():
     conn = sqlite3.connect("database.db")
@@ -191,6 +192,17 @@ def init_db():
     """)
     cur.execute("""
      CREATE TABLE IF NOT EXISTS feedback(
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         user_id INTEGER,
+         username TEXT,
+          page TEXT,
+          message TEXT,
+         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+    
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS admin_feedback(
          id INTEGER PRIMARY KEY AUTOINCREMENT,
          user_id INTEGER,
          username TEXT,
@@ -792,7 +804,7 @@ def feedback():
 
 
 # ── ADMIN: VIEW FEEDBACK ──
-@app.route("/admin/feedback")
+@app.route("/admin_feedback")
 @login_required
 def admin_feedback():
     if current_user.username != "anuragrajraj14@gmail.com":  # 👈 put your username here
